@@ -1,0 +1,63 @@
+.timeline-panel {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #405366;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 10px 14px 13px;
+}
+
+.timeline-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.timeline-heading strong {
+  color: #13293d;
+}
+
+.timeline-control {
+  position: relative;
+  padding: 7px 0 2px;
+}
+
+.timeline-control input {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  margin: 0;
+  accent-color: #2368aa;
+}
+
+.timeline-notches {
+  position: absolute;
+  inset: 0 6px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.timeline-notches button {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 18px;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid #7f9bb4;
+  border-radius: 999px;
+  background: #dce8f2;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.timeline-notches button.active {
+  height: 24px;
+  border-color: #1f5f9f;
+  background: #2368aa;
+}

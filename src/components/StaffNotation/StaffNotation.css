@@ -1,0 +1,36 @@
+.staff-panel {
+  min-width: 0;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.panel-heading h2 {
+  margin: 0;
+}
+
+.panel-heading span {
+  border: 1px solid #ccd7e2;
+  border-radius: 999px;
+  color: #3f5368;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+}
+
+.staff-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.staff-canvas {
+  min-width: 760px;
+  min-height: 156px;
+}
