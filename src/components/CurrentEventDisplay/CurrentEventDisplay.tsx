@@ -6,11 +6,13 @@ interface CurrentEventDisplayProps {
 }
 
 export function CurrentEventDisplay({ event }: CurrentEventDisplayProps) {
+  const noteLabel = formatEventNotes(event)
+
   return (
     <section className="current-event" aria-live="polite">
       <span>Current</span>
       <strong>{event.label}</strong>
-      <small>{formatEventNotes(event)}</small>
+      {noteLabel ? <small>{noteLabel}</small> : <small>Metronome only</small>}
     </section>
   )
 }

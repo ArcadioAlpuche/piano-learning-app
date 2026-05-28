@@ -1,47 +1,33 @@
 import { useMemo, useState } from 'react'
 import { CurrentEventDisplay } from './components/CurrentEventDisplay/CurrentEventDisplay'
-import { MetronomeControls } from './components/MetronomeControls/MetronomeControls'
+import { LessonSelectionModal } from './components/LessonSelectionModal/LessonSelectionModal'
+import { PracticeSettingsModal } from './components/MetronomeControls/PracticeSettingsModal'
 import { PianoKeyboard } from './components/PianoKeyboard/PianoKeyboard'
 import { PlaybackControls } from './components/PlaybackControls/PlaybackControls'
 import { ProgressSlider } from './components/ProgressSlider/ProgressSlider'
 import { StaffNotation } from './components/StaffNotation/StaffNotation'
-import { lessonCategories } from './data/sequences'
+import { lessonCategories, sequences } from './data/sequences'
 import { usePlaybackEngine } from './hooks/usePlaybackEngine'
-import type { KeyboardRangeOption, LessonCategoryId } from './lib/musicTypes'
+import type { KeyboardRangeOption, MusicalSequence } from './lib/musicTypes'
 import './App.css'
 
 function App() {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<LessonCategoryId>(lessonCategories[0].id)
-  const [selectedSequenceId, setSelectedSequenceId] = useState(lessonCategories[0].items[0].id)
+  const [selectedSequenceId, setSelectedSequenceId] = useState(sequences[0].id)
   const [keyboardRange, setKeyboardRange] = useState<KeyboardRangeOption>('two-octave')
 
-  const selectedCategory = useMemo(
-    () => lessonCategories.find((category) => category.id === selectedCategoryId) ?? lessonCategories[0],
-    [selectedCategoryId],
-  )
-
   const selectedSequence = useMemo(
-    () => selectedCategory.items.find((sequence) => sequence.id === selectedSequenceId) ?? selectedCategory.items[0],
-    [selectedCategory, selectedSequenceId],
+    () => sequences.find((sequence) => sequence.id === selectedSequenceId) ?? sequences[0],
+    [selectedSequenceId],
   )
-
-  const handleCategoryChange = (categoryId: LessonCategoryId) => {
-    const nextCategory = lessonCategories.find((category) => category.id === categoryId) ?? lessonCategories[0]
-    setSelectedCategoryId(nextCategory.id)
-    setSelectedSequenceId(nextCategory.items[0].id)
-  }
 
   return (
     <main className="app-shell">
       <LearningSession
         key={selectedSequence.id}
         keyboardRange={keyboardRange}
-        onCategoryChange={handleCategoryChange}
         onKeyboardRangeChange={setKeyboardRange}
-        onSequenceChange={setSelectedSequenceId}
-        selectedCategoryId={selectedCategoryId}
+        onSequenceChange={(sequence) => setSelectedSequenceId(sequence.id)}
         selectedSequenceId={selectedSequenceId}
-        sequenceOptions={selectedCategory.items}
         sequence={selectedSequence}
       />
     </main>
@@ -50,27 +36,23 @@ function App() {
 
 interface LearningSessionProps {
   keyboardRange: KeyboardRangeOption
-  onCategoryChange: (categoryId: LessonCategoryId) => void
   onKeyboardRangeChange: (range: KeyboardRangeOption) => void
-  onSequenceChange: (sequenceId: string) => void
-  selectedCategoryId: LessonCategoryId
+  onSequenceChange: (sequence: MusicalSequence) => void
   selectedSequenceId: string
-  sequence: typeof lessonCategories[number]['items'][number]
-  sequenceOptions: typeof lessonCategories[number]['items']
+  sequence: MusicalSequence
 }
 
 function LearningSession({
   keyboardRange,
-  onCategoryChange,
   onKeyboardRangeChange,
-  onSequenceChange,
-  selectedCategoryId,
   selectedSequenceId,
   sequence,
-  sequenceOptions,
+  onSequenceChange,
 }: LearningSessionProps) {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isLessonModalOpen, setIsLessonModalOpen] = useState(false)
   const playback = usePlaybackEngine({ sequence })
-  const activeNotes = playback.currentEvent.notes
+  const activeNotes = playback.activeNotes
   const sequenceNotes = useMemo(
     () => Array.from(new Set(sequence.events.flatMap((event) => event.notes))),
     [sequence],
@@ -84,33 +66,16 @@ function LearningSession({
           <h1>Piano Learning Playback</h1>
         </div>
 
-        <label className="nav-select">
-          <span>Category</span>
-          <select
-            onChange={(event) => onCategoryChange(event.target.value as LessonCategoryId)}
-            value={selectedCategoryId}
-          >
-            {lessonCategories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="nav-select">
+        <div className="lesson-picker">
           <span>Lesson</span>
-          <select
-            onChange={(event) => onSequenceChange(event.target.value)}
-            value={selectedSequenceId}
+          <button
+            aria-label="Open lesson selection"
+            onClick={() => setIsLessonModalOpen(true)}
+            type="button"
           >
-            {sequenceOptions.map((sequenceOption) => (
-              <option key={sequenceOption.id} value={sequenceOption.id}>
-                {sequenceOption.title}
-              </option>
-            ))}
-          </select>
-        </label>
+            {sequence.title}
+          </button>
+        </div>
 
         <label className="nav-select">
           <span>Keyboard</span>
@@ -125,6 +90,7 @@ function LearningSession({
 
         <PlaybackControls
           isPlaying={playback.isPlaying}
+          onOpenSettings={() => setIsSettingsOpen(true)}
           onStop={playback.stop}
           onStepBackward={playback.stepBackward}
           onStepForward={playback.stepForward}
@@ -133,10 +99,10 @@ function LearningSession({
           tempo={playback.tempo}
         />
 
-        <MetronomeControls
-          audioMode={playback.audioMode}
-          onAudioModeChange={playback.setAudioMode}
-        />
+        <div className="practice-status" aria-label="Practice loop status">
+          <span>{playback.audioMode === 'note-click' ? 'Note + click' : playback.audioMode === 'note-only' ? 'Note only' : 'Click only'}</span>
+          <strong>{playback.isLoopEnabled ? `Loop ${playback.turnaroundMeasures}m` : 'Loop off'}</strong>
+        </div>
 
         <div className="compact-current">
           <CurrentEventDisplay event={playback.currentEvent} />
@@ -159,6 +125,33 @@ function LearningSession({
         onPreviewNotes={playback.previewNotes}
         range={keyboardRange}
         sequenceNotes={sequenceNotes}
+      />
+
+      <PracticeSettingsModal
+        audioMode={playback.audioMode}
+        isLoopEnabled={playback.isLoopEnabled}
+        isOpen={isSettingsOpen}
+        onAudioModeChange={playback.setAudioMode}
+        onClose={() => setIsSettingsOpen(false)}
+        onLoopEnabledChange={playback.setIsLoopEnabled}
+        onTempoChange={playback.setTempo}
+        onTempoStepSizeChange={playback.setTempoStepSize}
+        onTurnaroundMeasuresChange={playback.setTurnaroundMeasures}
+        tempo={playback.tempo}
+        tempoStepSize={playback.tempoStepSize}
+        turnaroundMeasures={playback.turnaroundMeasures}
+      />
+
+      <LessonSelectionModal
+        categories={lessonCategories}
+        isOpen={isLessonModalOpen}
+        onClose={() => setIsLessonModalOpen(false)}
+        onSelectLesson={(lesson) => {
+          playback.stop()
+          onSequenceChange(lesson)
+          setIsLessonModalOpen(false)
+        }}
+        selectedLessonId={selectedSequenceId}
       />
     </>
   )

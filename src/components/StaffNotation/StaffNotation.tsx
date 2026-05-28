@@ -34,8 +34,12 @@ export function StaffNotation({ sequence, currentStepIndex }: StaffNotationProps
       })
 
       event.notes.forEach((note, noteIndex) => {
-        if (parseNote(note).pitchClass.includes('#')) {
+        const { pitchClass } = parseNote(note)
+
+        if (pitchClass.includes('#')) {
           staveNote.addModifier(new Accidental('#'), noteIndex)
+        } else if (pitchClass.includes('b')) {
+          staveNote.addModifier(new Accidental('b'), noteIndex)
         }
       })
 

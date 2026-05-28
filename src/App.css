@@ -8,7 +8,7 @@
 
 .top-control-bar {
   display: grid;
-  grid-template-columns: minmax(150px, 0.75fr) 120px minmax(170px, 1fr) 116px minmax(430px, 2fr) 140px 130px;
+  grid-template-columns: minmax(140px, 0.7fr) minmax(190px, 1fr) 108px minmax(440px, 2.2fr) 112px 130px;
   align-items: end;
   gap: 10px;
   padding: 12px 18px;
@@ -36,14 +36,22 @@
   line-height: 1.05;
 }
 
+.lesson-picker,
 .nav-select,
-.tempo-control,
-.metronome-controls label {
+.tempo-control {
   display: grid;
   gap: 4px;
   color: #405366;
   font-size: 12px;
   font-weight: 800;
+}
+
+.lesson-picker button {
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 select,
@@ -98,13 +106,13 @@ button.primary {
 
 .playback-controls {
   display: grid;
-  grid-template-columns: repeat(4, minmax(72px, max-content)) minmax(140px, 1fr);
+  grid-template-columns: repeat(4, minmax(72px, max-content)) minmax(120px, 1fr) max-content;
   align-items: end;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tempo-control {
-  min-width: 140px;
+  min-width: 120px;
 }
 
 input[type='range'] {
@@ -112,12 +120,26 @@ input[type='range'] {
   accent-color: #2368aa;
 }
 
-.metronome-controls {
-  min-width: 0;
-}
-
 .compact-current .current-event {
   min-height: 55px;
+}
+
+.practice-status {
+  display: grid;
+  gap: 2px;
+  min-height: 55px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #405366;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 8px 10px;
+}
+
+.practice-status strong {
+  color: #13293d;
+  font-size: 16px;
 }
 
 .learning-stage {
@@ -166,7 +188,7 @@ input[type='range'] {
   white-space: nowrap;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1500px) {
   .top-control-bar {
     grid-template-columns: 1fr 1fr 1fr;
     align-items: end;
@@ -174,7 +196,7 @@ input[type='range'] {
 
   .playback-controls {
     grid-column: 1 / -1;
-    grid-template-columns: repeat(4, minmax(72px, max-content)) minmax(180px, 1fr);
+    grid-template-columns: repeat(4, minmax(72px, max-content)) minmax(180px, 1fr) max-content;
   }
 }
 
@@ -191,4 +213,82 @@ input[type='range'] {
   .playback-controls {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(12, 24, 36, 0.42);
+}
+
+.settings-modal {
+  width: min(440px, 100%);
+  display: grid;
+  gap: 14px;
+  border: 1px solid #c9d5e0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(18, 35, 52, 0.24);
+  padding: 18px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.settings-bpm {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #13293d;
+}
+
+.settings-bpm span {
+  font-size: 44px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.settings-bpm strong {
+  font-size: 13px;
+}
+
+.settings-field {
+  display: grid;
+  gap: 6px;
+  color: #405366;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.settings-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #13293d;
+  font-weight: 800;
+}
+
+.settings-note {
+  margin: 0;
+  color: #52677a;
+  font-size: 13px;
 }
