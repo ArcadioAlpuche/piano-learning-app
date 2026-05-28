@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { KeyboardRangeOption, NoteName } from '../../lib/musicTypes'
-import { getKeyboardNotes } from '../../lib/noteUtils'
+import { getKeyboardNotes, noteToComparableValue } from '../../lib/noteUtils'
 import './PianoKeyboard.css'
 
 interface PianoKeyboardProps {
@@ -14,8 +14,8 @@ export function PianoKeyboard({ activeNotes, range, sequenceNotes, onPreviewNote
   const notes = getKeyboardNotes(range)
   const whiteNotes = notes.filter((note) => !note.isBlack)
   const blackNotes = notes.filter((note) => note.isBlack)
-  const activeNoteSet = new Set(activeNotes)
-  const sequenceNoteSet = new Set(sequenceNotes)
+  const activeNoteSet = new Set(activeNotes.map(noteToComparableValue))
+  const sequenceNoteSet = new Set(sequenceNotes.map(noteToComparableValue))
 
   const whiteIndexByMidi = new Map(whiteNotes.map((note, index) => [note.midi, index]))
   const keyboardStyle = { '--white-key-count': whiteNotes.length } as CSSProperties
@@ -33,7 +33,7 @@ export function PianoKeyboard({ activeNotes, range, sequenceNotes, onPreviewNote
         <div className="white-keys">
           {whiteNotes.map((note) => (
             <button
-              className={`piano-key white-key ${sequenceNoteSet.has(note.note) ? 'upcoming' : ''} ${activeNoteSet.has(note.note) ? 'active' : ''}`}
+              className={`piano-key white-key ${sequenceNoteSet.has(note.midi) ? 'upcoming' : ''} ${activeNoteSet.has(note.midi) ? 'active' : ''}`}
               key={note.note}
               onClick={() => onPreviewNotes([note.note])}
               type="button"
@@ -48,13 +48,13 @@ export function PianoKeyboard({ activeNotes, range, sequenceNotes, onPreviewNote
 
           return (
             <button
-              className={`piano-key black-key ${sequenceNoteSet.has(note.note) ? 'upcoming' : ''} ${activeNoteSet.has(note.note) ? 'active' : ''}`}
+              className={`piano-key black-key ${sequenceNoteSet.has(note.midi) ? 'upcoming' : ''} ${activeNoteSet.has(note.midi) ? 'active' : ''}`}
               key={note.note}
               onClick={() => onPreviewNotes([note.note])}
               style={{ '--black-key-left': previousWhiteIndex + 1 } as CSSProperties}
               type="button"
             >
-              <span>{activeNoteSet.has(note.note) ? note.note : note.pitchClass}</span>
+              <span>{activeNoteSet.has(note.midi) ? note.note : note.pitchClass}</span>
             </button>
           )
         })}

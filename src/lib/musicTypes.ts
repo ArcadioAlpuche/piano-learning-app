@@ -2,11 +2,17 @@ export type NoteName = string
 
 export type AudioMode = 'note-click' | 'note-only' | 'click-only'
 
-export type LessonCategoryId = 'scales' | 'chords' | 'songs'
+export type LessonCategoryId = 'scales' | 'chords' | 'songs' | 'exercises'
+
+export type PlaybackPhase = 'sequence' | 'measure-completion' | 'turnaround' | 'stopped'
 
 export type SequenceKind = 'scale' | 'chord' | 'melody'
 
 export type KeyboardRangeOption = 'one-octave' | 'two-octave'
+
+export type TempoStepSize = 1 | 5 | 10
+
+export type TurnaroundMeasures = 0 | 1 | 2
 
 export interface MusicalEvent {
   id: string
@@ -24,6 +30,7 @@ export interface MusicalEvent {
 export interface MusicalSequence {
   id: string
   title: string
+  summary?: string
   kind: SequenceKind
   defaultTempo: number
   clef: 'treble'
@@ -33,5 +40,12 @@ export interface MusicalSequence {
 export interface LessonCategory {
   id: LessonCategoryId
   label: string
-  items: MusicalSequence[]
+  groups: LessonGroup[]
+}
+
+export interface LessonGroup {
+  id: string
+  label: string
+  description?: string
+  lessons: MusicalSequence[]
 }

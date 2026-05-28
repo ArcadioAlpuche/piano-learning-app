@@ -49,6 +49,10 @@ export function noteToMidi(note: NoteName) {
   return (octave + 1) * 12 + NOTE_TO_SEMITONE[pitchClass]
 }
 
+export function noteToComparableValue(note: NoteName) {
+  return noteToMidi(note)
+}
+
 export function midiToNote(midi: number): NoteName {
   const pitchClass = SEMITONE_TO_SHARP[midi % 12]
   const octave = Math.floor(midi / 12) - 1

@@ -1,15 +1,35 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as Tone from 'tone'
-import type { AudioMode, MusicalEvent, MusicalSequence } from '../lib/musicTypes'
+import type {
+  AudioMode,
+  MusicalEvent,
+  MusicalSequence,
+  PlaybackPhase,
+  TempoStepSize,
+  TurnaroundMeasures,
+} from '../lib/musicTypes'
 
 interface PlaybackEngineOptions {
   sequence: MusicalSequence
 }
 
+const BEATS_PER_MEASURE = 4
 const MIN_BEAT_DURATION = 0.001
+const TURNAROUND_EVENT: MusicalEvent = {
+  id: 'turnaround',
+  notes: [],
+  durationBeats: 1,
+  label: 'Practice Turnaround',
+}
+const MEASURE_COMPLETION_EVENT: MusicalEvent = {
+  id: 'measure-completion',
+  notes: [],
+  durationBeats: 1,
+  label: 'Complete Measure',
+}
 
 function clampTempo(tempo: number) {
-  return Math.min(Math.max(tempo, 30), 240)
+  return Math.min(Math.max(tempo, 40), 240)
 }
 
 function clampStepIndex(stepIndex: number, lastStepIndex: number) {
@@ -21,7 +41,7 @@ function getEventDuration(event: MusicalEvent) {
   return Math.max(event.durationBeats, MIN_BEAT_DURATION)
 }
 
-function getTotalBeats(sequence: MusicalSequence) {
+function getTotalSequenceBeats(sequence: MusicalSequence) {
   return sequence.events.reduce((total, event) => total + getEventDuration(event), 0)
 }
 
@@ -45,11 +65,29 @@ function getEventIndexAtBeat(sequence: MusicalSequence, beat: number) {
   return -1
 }
 
+function getTurnaroundBeats(measures: TurnaroundMeasures) {
+  return measures * BEATS_PER_MEASURE
+}
+
+function getMeasureCompletionBeats(sequenceBeats: number) {
+  const beatRemainder = sequenceBeats % BEATS_PER_MEASURE
+
+  if (beatRemainder < 0.000001 || BEATS_PER_MEASURE - beatRemainder < 0.000001) {
+    return 0
+  }
+
+  return BEATS_PER_MEASURE - beatRemainder
+}
+
 export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
   const [currentStepIndex, setCurrentStepIndexState] = useState(0)
   const [isPlaying, setIsPlayingState] = useState(false)
   const [tempo, setTempoState] = useState(sequence.defaultTempo)
   const [audioMode, setAudioModeState] = useState<AudioMode>('note-click')
+  const [isLoopEnabled, setIsLoopEnabledState] = useState(false)
+  const [turnaroundMeasures, setTurnaroundMeasuresState] = useState<TurnaroundMeasures>(1)
+  const [tempoStepSize, setTempoStepSizeState] = useState<TempoStepSize>(1)
+  const [playbackPhase, setPlaybackPhaseState] = useState<PlaybackPhase>('stopped')
 
   const synthRef = useRef<Tone.PolySynth | null>(null)
   const clickRef = useRef<Tone.MembraneSynth | null>(null)
@@ -66,6 +104,9 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
   const tempoRef = useRef(tempo)
   const audioModeRef = useRef(audioMode)
   const selectedSequenceRef = useRef(sequence)
+  const isLoopEnabledRef = useRef(isLoopEnabled)
+  const turnaroundMeasuresRef = useRef(turnaroundMeasures)
+  const playbackPhaseRef = useRef<PlaybackPhase>('stopped')
   const lastTriggeredStepIndexRef = useRef<number | null>(null)
 
   const fallbackEvent: MusicalEvent = useMemo(
@@ -80,7 +121,17 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
 
   const lastStepIndex = sequence.events.length - 1
   const safeStepIndex = clampStepIndex(currentStepIndex, lastStepIndex)
-  const currentEvent = sequence.events[safeStepIndex] ?? fallbackEvent
+  const isInTurnaround = playbackPhase === 'turnaround'
+  const isCompletingMeasure = playbackPhase === 'measure-completion'
+  const currentEvent = isInTurnaround
+    ? TURNAROUND_EVENT
+    : isCompletingMeasure
+      ? MEASURE_COMPLETION_EVENT
+      : sequence.events[safeStepIndex] ?? fallbackEvent
+  const activeNotes = useMemo(
+    () => (isInTurnaround || isCompletingMeasure ? [] : currentEvent.notes),
+    [currentEvent.notes, isCompletingMeasure, isInTurnaround],
+  )
   const isSequenceComplete = !isPlaying && lastStepIndex >= 0 && safeStepIndex === lastStepIndex
 
   const setCurrentStepIndex = useCallback((stepIndex: number) => {
@@ -92,6 +143,11 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
   const setIsPlaying = useCallback((nextIsPlaying: boolean) => {
     isPlayingRef.current = nextIsPlaying
     setIsPlayingState(nextIsPlaying)
+  }, [])
+
+  const setPlaybackPhase = useCallback((nextPhase: PlaybackPhase) => {
+    playbackPhaseRef.current = nextPhase
+    setPlaybackPhaseState(nextPhase)
   }, [])
 
   const getSynth = useCallback(() => {
@@ -144,98 +200,179 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
     [getSynth],
   )
 
-  const runSchedulerFrame = useCallback(
-    (runId: number, now: number) => {
-      if (!isPlayingRef.current || schedulerRunIdRef.current !== runId) return
-
+  const startSchedulerFromBeat = useCallback(
+    (startBeat: number, shouldTriggerCurrentEvent = true) => {
       const activeSequence = selectedSequenceRef.current
-      const totalBeats = getTotalBeats(activeSequence)
-      const msPerBeat = 60000 / tempoRef.current
-      const elapsedBeats = playbackStartBeatRef.current + (now - playbackStartTimeRef.current) / msPerBeat
-      currentBeatRef.current = elapsedBeats
-
-      const currentWholeBeat = Math.floor(elapsedBeats + 0.000001)
-      for (let beat = lastMetronomeBeatRef.current + 1; beat <= currentWholeBeat; beat += 1) {
-        if (beat >= 0 && beat < totalBeats) {
-          triggerClick()
-        }
-      }
-      lastMetronomeBeatRef.current = currentWholeBeat
-
-      if (elapsedBeats >= totalBeats) {
-        stopScheduler()
-        lastTriggeredStepIndexRef.current = null
-        currentBeatRef.current = totalBeats
-        setCurrentStepIndex(activeSequence.events.length - 1)
-        setIsPlaying(false)
-        synthRef.current?.releaseAll()
-        return
-      }
-
-      const eventIndex = getEventIndexAtBeat(activeSequence, elapsedBeats)
-      const event = eventIndex >= 0 ? activeSequence.events[eventIndex] : undefined
-
-      if (!event) {
-        stopScheduler()
-        setIsPlaying(false)
-        return
-      }
-
-      if (eventIndex !== currentStepIndexRef.current) {
-        setCurrentStepIndex(eventIndex)
-      }
-
-      if (eventIndex !== lastTriggeredStepIndexRef.current) {
-        lastTriggeredStepIndexRef.current = eventIndex
-        triggerEventNotes(event)
-      }
-
-      animationFrameIdRef.current = window.requestAnimationFrame((nextNow) => {
-        schedulerFrameRef.current(runId, nextNow)
-      })
-    },
-    [setCurrentStepIndex, setIsPlaying, stopScheduler, triggerClick, triggerEventNotes],
-  )
-
-  const startSchedulerFromStep = useCallback(
-    (stepIndex: number) => {
-      const activeSequence = selectedSequenceRef.current
+      const sequenceBeats = getTotalSequenceBeats(activeSequence)
       const lastIndex = activeSequence.events.length - 1
 
       stopScheduler()
 
-      if (lastIndex < 0) {
+      if (lastIndex < 0 || sequenceBeats <= 0) {
         setCurrentStepIndex(0)
+        setPlaybackPhase('stopped')
         setIsPlaying(false)
         return
       }
 
-      const nextStepIndex = clampStepIndex(stepIndex, lastIndex)
-      const startBeat = getEventStartBeat(activeSequence, nextStepIndex)
-      const startEvent = activeSequence.events[nextStepIndex]
+      const measureCompletionBeats = getMeasureCompletionBeats(sequenceBeats)
+      const turnaroundBeats = isLoopEnabledRef.current ? getTurnaroundBeats(turnaroundMeasuresRef.current) : 0
+      const cycleBeats = sequenceBeats + measureCompletionBeats + turnaroundBeats
+      const nextBeat = Math.min(Math.max(startBeat, 0), Math.max(cycleBeats - MIN_BEAT_DURATION, 0))
+      const startsInMeasureCompletion = nextBeat >= sequenceBeats && nextBeat < sequenceBeats + measureCompletionBeats
+      const startsInTurnaround = isLoopEnabledRef.current && nextBeat >= sequenceBeats + measureCompletionBeats
+      const nextStepIndex = startsInMeasureCompletion || startsInTurnaround
+        ? lastIndex
+        : clampStepIndex(getEventIndexAtBeat(activeSequence, nextBeat), lastIndex)
 
+      currentBeatRef.current = nextBeat
       currentStepIndexRef.current = nextStepIndex
-      currentBeatRef.current = startBeat
-      playbackStartBeatRef.current = startBeat
+      playbackStartBeatRef.current = nextBeat
       playbackStartTimeRef.current = performance.now()
-      lastMetronomeBeatRef.current = Math.ceil(startBeat) - 1
-      lastTriggeredStepIndexRef.current = nextStepIndex
+      lastMetronomeBeatRef.current = Math.ceil(nextBeat) - 1
+      lastTriggeredStepIndexRef.current =
+        shouldTriggerCurrentEvent && !startsInMeasureCompletion && !startsInTurnaround ? nextStepIndex : null
+
       setCurrentStepIndexState(nextStepIndex)
+      setPlaybackPhase(
+        startsInTurnaround ? 'turnaround' : startsInMeasureCompletion ? 'measure-completion' : 'sequence',
+      )
       setIsPlaying(true)
 
-      triggerEventNotes(startEvent)
+      if (shouldTriggerCurrentEvent && !startsInMeasureCompletion && !startsInTurnaround) {
+        const startEvent = activeSequence.events[nextStepIndex]
+        if (startEvent) {
+          triggerEventNotes(startEvent)
+        }
+      }
 
       const runId = schedulerRunIdRef.current
       animationFrameIdRef.current = window.requestAnimationFrame((now) => {
         schedulerFrameRef.current(runId, now)
       })
     },
-    [setCurrentStepIndex, setIsPlaying, stopScheduler, triggerEventNotes],
+    [setCurrentStepIndex, setIsPlaying, setPlaybackPhase, stopScheduler, triggerEventNotes],
+  )
+
+  const finishPlayback = useCallback(
+    (activeSequence: MusicalSequence) => {
+      stopScheduler()
+      synthRef.current?.releaseAll()
+      lastTriggeredStepIndexRef.current = null
+      currentBeatRef.current = getTotalSequenceBeats(activeSequence)
+      setCurrentStepIndex(activeSequence.events.length - 1)
+      setPlaybackPhase('stopped')
+      setIsPlaying(false)
+    },
+    [setCurrentStepIndex, setIsPlaying, setPlaybackPhase, stopScheduler],
+  )
+
+  const runSchedulerFrame = useCallback(
+    (runId: number, now: number) => {
+      if (!isPlayingRef.current || schedulerRunIdRef.current !== runId) return
+
+      const activeSequence = selectedSequenceRef.current
+      const sequenceBeats = getTotalSequenceBeats(activeSequence)
+      const measureCompletionBeats = getMeasureCompletionBeats(sequenceBeats)
+      const turnaroundBeats = isLoopEnabledRef.current ? getTurnaroundBeats(turnaroundMeasuresRef.current) : 0
+      const turnaroundStartBeat = sequenceBeats + measureCompletionBeats
+      const cycleBeats = turnaroundStartBeat + turnaroundBeats
+      const msPerBeat = 60000 / tempoRef.current
+      const elapsedBeats = playbackStartBeatRef.current + (now - playbackStartTimeRef.current) / msPerBeat
+
+      if (sequenceBeats <= 0 || cycleBeats <= 0) {
+        finishPlayback(activeSequence)
+        return
+      }
+
+      const currentWholeBeat = Math.floor(elapsedBeats + 0.000001)
+      for (let beat = lastMetronomeBeatRef.current + 1; beat <= currentWholeBeat; beat += 1) {
+        if (beat >= 0 && beat < cycleBeats) {
+          triggerClick()
+        }
+      }
+      lastMetronomeBeatRef.current = currentWholeBeat
+
+      if (elapsedBeats >= cycleBeats) {
+        if (!isLoopEnabledRef.current) {
+          finishPlayback(activeSequence)
+          return
+        }
+
+        const loopedBeat = 0
+        currentBeatRef.current = loopedBeat
+        playbackStartBeatRef.current = loopedBeat
+        playbackStartTimeRef.current = now
+        lastMetronomeBeatRef.current = 0
+        lastTriggeredStepIndexRef.current = null
+        setPlaybackPhase('sequence')
+        setCurrentStepIndex(0)
+        triggerClick()
+
+        const firstEvent = activeSequence.events[0]
+        if (firstEvent) {
+          lastTriggeredStepIndexRef.current = 0
+          triggerEventNotes(firstEvent)
+        }
+      } else {
+        currentBeatRef.current = elapsedBeats
+
+        if (elapsedBeats >= sequenceBeats && elapsedBeats < turnaroundStartBeat) {
+          if (playbackPhaseRef.current !== 'measure-completion') {
+            synthRef.current?.releaseAll()
+            lastTriggeredStepIndexRef.current = null
+            setPlaybackPhase('measure-completion')
+            setCurrentStepIndex(activeSequence.events.length - 1)
+          }
+        } else if (isLoopEnabledRef.current && elapsedBeats >= turnaroundStartBeat) {
+          if (playbackPhaseRef.current !== 'turnaround') {
+            synthRef.current?.releaseAll()
+            lastTriggeredStepIndexRef.current = null
+            setPlaybackPhase('turnaround')
+            setCurrentStepIndex(activeSequence.events.length - 1)
+          }
+        } else {
+          if (playbackPhaseRef.current !== 'sequence') {
+            setPlaybackPhase('sequence')
+          }
+
+          const eventIndex = getEventIndexAtBeat(activeSequence, elapsedBeats)
+          const event = eventIndex >= 0 ? activeSequence.events[eventIndex] : undefined
+
+          if (!event) {
+            finishPlayback(activeSequence)
+            return
+          }
+
+          if (eventIndex !== currentStepIndexRef.current) {
+            setCurrentStepIndex(eventIndex)
+          }
+
+          if (eventIndex !== lastTriggeredStepIndexRef.current) {
+            lastTriggeredStepIndexRef.current = eventIndex
+            triggerEventNotes(event)
+          }
+        }
+      }
+
+      animationFrameIdRef.current = window.requestAnimationFrame((nextNow) => {
+        schedulerFrameRef.current(runId, nextNow)
+      })
+    },
+    [finishPlayback, setCurrentStepIndex, setPlaybackPhase, triggerClick, triggerEventNotes],
   )
 
   useEffect(() => {
     schedulerFrameRef.current = runSchedulerFrame
   }, [runSchedulerFrame])
+
+  const startSchedulerFromStep = useCallback(
+    (stepIndex: number, shouldTriggerCurrentEvent = true) => {
+      const startBeat = getEventStartBeat(selectedSequenceRef.current, stepIndex)
+      startSchedulerFromBeat(startBeat, shouldTriggerCurrentEvent)
+    },
+    [startSchedulerFromBeat],
+  )
 
   const play = useCallback(async () => {
     const commandId = commandIdRef.current + 1
@@ -247,10 +384,17 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
 
     const activeSequence = selectedSequenceRef.current
     const lastIndex = activeSequence.events.length - 1
-    const nextStepIndex = currentStepIndexRef.current >= lastIndex ? 0 : currentStepIndexRef.current
 
+    if (lastIndex < 0) return
+
+    if (playbackPhaseRef.current === 'turnaround' || playbackPhaseRef.current === 'measure-completion') {
+      startSchedulerFromBeat(currentBeatRef.current, false)
+      return
+    }
+
+    const nextStepIndex = currentStepIndexRef.current >= lastIndex ? 0 : currentStepIndexRef.current
     startSchedulerFromStep(nextStepIndex)
-  }, [startSchedulerFromStep])
+  }, [startSchedulerFromBeat, startSchedulerFromStep])
 
   const pause = useCallback(() => {
     commandIdRef.current += 1
@@ -267,8 +411,9 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
     currentBeatRef.current = 0
     playbackStartBeatRef.current = 0
     setCurrentStepIndex(0)
+    setPlaybackPhase('stopped')
     setIsPlaying(false)
-  }, [setCurrentStepIndex, setIsPlaying, stopScheduler])
+  }, [setCurrentStepIndex, setIsPlaying, setPlaybackPhase, stopScheduler])
 
   const seek = useCallback(
     (stepIndex: number) => {
@@ -280,12 +425,14 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
       synthRef.current?.releaseAll()
       lastTriggeredStepIndexRef.current = null
       setCurrentStepIndex(nextStepIndex)
+      setPlaybackPhase('sequence')
+      currentBeatRef.current = getEventStartBeat(selectedSequenceRef.current, nextStepIndex)
 
       if (wasPlaying) {
         startSchedulerFromStep(nextStepIndex)
       }
     },
-    [setCurrentStepIndex, startSchedulerFromStep, stopScheduler],
+    [setCurrentStepIndex, setPlaybackPhase, startSchedulerFromStep, stopScheduler],
   )
 
   const stepForward = useCallback(() => {
@@ -293,16 +440,18 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
     stopScheduler()
     synthRef.current?.releaseAll()
     setIsPlaying(false)
-    setCurrentStepIndex(currentStepIndexRef.current + 1)
-  }, [setCurrentStepIndex, setIsPlaying, stopScheduler])
+    setPlaybackPhase('sequence')
+    setCurrentStepIndex(playbackPhaseRef.current === 'sequence' ? currentStepIndexRef.current + 1 : selectedSequenceRef.current.events.length - 1)
+  }, [setCurrentStepIndex, setIsPlaying, setPlaybackPhase, stopScheduler])
 
   const stepBackward = useCallback(() => {
     commandIdRef.current += 1
     stopScheduler()
     synthRef.current?.releaseAll()
     setIsPlaying(false)
-    setCurrentStepIndex(currentStepIndexRef.current - 1)
-  }, [setCurrentStepIndex, setIsPlaying, stopScheduler])
+    setPlaybackPhase('sequence')
+    setCurrentStepIndex(playbackPhaseRef.current === 'sequence' ? currentStepIndexRef.current - 1 : selectedSequenceRef.current.events.length - 1)
+  }, [setCurrentStepIndex, setIsPlaying, setPlaybackPhase, stopScheduler])
 
   const previewNotes = useCallback(
     async (notes: string[]) => {
@@ -323,10 +472,17 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
       setTempoState(nextClampedTempo)
 
       if (wasPlaying) {
-        startSchedulerFromStep(currentStepIndexRef.current)
+        startSchedulerFromBeat(currentBeatRef.current, false)
       }
     },
-    [startSchedulerFromStep],
+    [startSchedulerFromBeat],
+  )
+
+  const adjustTempo = useCallback(
+    (direction: -1 | 1) => {
+      setTempo(tempoRef.current + direction * tempoStepSize)
+    },
+    [setTempo, tempoStepSize],
   )
 
   const setAudioMode = useCallback((nextAudioMode: AudioMode) => {
@@ -334,11 +490,27 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
     setAudioModeState(nextAudioMode)
   }, [])
 
+  const setIsLoopEnabled = useCallback((nextIsLoopEnabled: boolean) => {
+    isLoopEnabledRef.current = nextIsLoopEnabled
+    setIsLoopEnabledState(nextIsLoopEnabled)
+  }, [])
+
+  const setTurnaroundMeasures = useCallback((nextTurnaroundMeasures: TurnaroundMeasures) => {
+    turnaroundMeasuresRef.current = nextTurnaroundMeasures
+    setTurnaroundMeasuresState(nextTurnaroundMeasures)
+  }, [])
+
+  const setTempoStepSize = useCallback((nextTempoStepSize: TempoStepSize) => {
+    setTempoStepSizeState(nextTempoStepSize)
+  }, [])
+
   useEffect(() => {
     selectedSequenceRef.current = sequence
     tempoRef.current = tempo
     audioModeRef.current = audioMode
-  }, [audioMode, sequence, tempo])
+    isLoopEnabledRef.current = isLoopEnabled
+    turnaroundMeasuresRef.current = turnaroundMeasures
+  }, [audioMode, isLoopEnabled, sequence, tempo, turnaroundMeasures])
 
   useEffect(() => {
     return () => {
@@ -354,40 +526,58 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
 
   return useMemo(
     () => ({
+      activeNotes,
+      adjustTempo,
       audioMode,
       currentEvent,
       currentStepIndex: safeStepIndex,
+      isLoopEnabled,
       isPlaying,
       isSequenceComplete,
       lastStepIndex,
       pause,
       play,
+      playbackPhase,
       previewNotes,
       seek,
       setAudioMode,
+      setIsLoopEnabled,
       setTempo,
+      setTempoStepSize,
+      setTurnaroundMeasures,
       stepBackward,
       stepForward,
       stop,
       tempo,
+      tempoStepSize,
+      turnaroundMeasures,
     }),
     [
+      activeNotes,
+      adjustTempo,
       audioMode,
       currentEvent,
+      isLoopEnabled,
       isPlaying,
       isSequenceComplete,
       lastStepIndex,
       pause,
       play,
+      playbackPhase,
       previewNotes,
       safeStepIndex,
       seek,
       setAudioMode,
+      setIsLoopEnabled,
       setTempo,
+      setTempoStepSize,
+      setTurnaroundMeasures,
       stepBackward,
       stepForward,
       stop,
       tempo,
+      tempoStepSize,
+      turnaroundMeasures,
     ],
   )
 }

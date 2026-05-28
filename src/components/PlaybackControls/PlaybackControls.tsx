@@ -1,6 +1,7 @@
 interface PlaybackControlsProps {
   isPlaying: boolean
   tempo: number
+  onOpenSettings: () => void
   onTogglePlayback: () => void
   onStop: () => void
   onStepBackward: () => void
@@ -11,6 +12,7 @@ interface PlaybackControlsProps {
 export function PlaybackControls({
   isPlaying,
   tempo,
+  onOpenSettings,
   onTogglePlayback,
   onStop,
   onStepBackward,
@@ -29,14 +31,15 @@ export function PlaybackControls({
       <label className="tempo-control">
         <span>Tempo: {tempo} BPM</span>
         <input
-          max="144"
-          min="50"
+          max="240"
+          min="40"
           onChange={(event) => onTempoChange(Number(event.target.value))}
           step="1"
           type="range"
           value={tempo}
         />
       </label>
+      <button onClick={onOpenSettings} type="button">Settings</button>
     </section>
   )
 }
