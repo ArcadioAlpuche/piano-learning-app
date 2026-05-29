@@ -1,5 +1,7 @@
 import type { LessonCategory, MusicalSequence, NoteName } from '../lib/musicTypes'
 
+const CHORD_MEASURE_BEATS = 4
+
 interface ScaleDefinition {
   id: string
   title: string
@@ -128,7 +130,7 @@ const cMajorChord: MusicalSequence = {
     {
       id: 'c-major-root',
       notes: ['C4', 'E4', 'G4'],
-      durationBeats: 4,
+      durationBeats: CHORD_MEASURE_BEATS,
       label: 'C Major - C E G',
       fingering: ['1', '3', '5'],
       metadata: { chordName: 'C Major' },
@@ -147,11 +149,83 @@ const aMinorChord: MusicalSequence = {
     {
       id: 'a-minor-root',
       notes: ['A4', 'C5', 'E5'],
-      durationBeats: 4,
+      durationBeats: CHORD_MEASURE_BEATS,
       label: 'A Minor - A C E',
       fingering: ['1', '3', '5'],
       metadata: { chordName: 'A Minor' },
     },
+  ],
+}
+
+const fMajorChord: MusicalSequence = {
+  id: 'f-major-chord',
+  title: 'F Major Root Position',
+  summary: 'Major triad - Root position',
+  kind: 'chord',
+  defaultTempo: 72,
+  clef: 'treble',
+  events: [
+    {
+      id: 'f-major-root',
+      notes: ['F4', 'A4', 'C5'],
+      durationBeats: CHORD_MEASURE_BEATS,
+      label: 'F Major - F A C',
+      fingering: ['1', '3', '5'],
+      metadata: { chordName: 'F Major' },
+    },
+  ],
+}
+
+const gMajorChord: MusicalSequence = {
+  id: 'g-major-chord',
+  title: 'G Major Root Position',
+  summary: 'Major triad - Root position',
+  kind: 'chord',
+  defaultTempo: 72,
+  clef: 'treble',
+  events: [
+    {
+      id: 'g-major-root',
+      notes: ['G4', 'B4', 'D5'],
+      durationBeats: CHORD_MEASURE_BEATS,
+      label: 'G Major - G B D',
+      fingering: ['1', '3', '5'],
+      metadata: { chordName: 'G Major' },
+    },
+  ],
+}
+
+const cMajorPopProgression: MusicalSequence = {
+  id: 'c-major-pop-progression',
+  title: 'I-V-vi-IV Progression in C',
+  summary: 'C - G - Am - F',
+  kind: 'chord',
+  defaultTempo: 76,
+  clef: 'treble',
+  events: [
+    { id: 'pop-i', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+    { id: 'pop-v', notes: ['G4', 'B4', 'D5'], durationBeats: 4, label: 'G Major - G B D', metadata: { chordName: 'G Major' } },
+    { id: 'pop-vi', notes: ['A4', 'C5', 'E5'], durationBeats: 4, label: 'A Minor - A C E', metadata: { chordName: 'A Minor' } },
+    { id: 'pop-iv', notes: ['F4', 'A4', 'C5'], durationBeats: 4, label: 'F Major - F A C', metadata: { chordName: 'F Major' } },
+  ],
+}
+
+const simpleMajorKeyPractice: MusicalSequence = {
+  id: 'simple-major-key-practice',
+  title: 'Simple Major Key Practice',
+  summary: 'Scale fragment plus C, F, G, Am',
+  kind: 'chord',
+  defaultTempo: 84,
+  clef: 'treble',
+  events: [
+    { id: 'simple-c4', notes: ['C4'], durationBeats: 1, label: 'C4' },
+    { id: 'simple-d4', notes: ['D4'], durationBeats: 1, label: 'D4' },
+    { id: 'simple-e4', notes: ['E4'], durationBeats: 1, label: 'E4' },
+    { id: 'simple-g4', notes: ['G4'], durationBeats: 1, label: 'G4' },
+    { id: 'simple-c-chord', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+    { id: 'simple-f-chord', notes: ['F4', 'A4', 'C5'], durationBeats: 4, label: 'F Major - F A C', metadata: { chordName: 'F Major' } },
+    { id: 'simple-g-chord', notes: ['G4', 'B4', 'D5'], durationBeats: 4, label: 'G Major - G B D', metadata: { chordName: 'G Major' } },
+    { id: 'simple-am-chord', notes: ['A4', 'C5', 'E5'], durationBeats: 4, label: 'A Minor - A C E', metadata: { chordName: 'A Minor' } },
   ],
 }
 
@@ -255,7 +329,7 @@ export const lessonCategories: LessonCategory[] = [
       {
         id: 'major-triads',
         label: 'Major Triads',
-        lessons: [cMajorChord],
+        lessons: [cMajorChord, fMajorChord, gMajorChord],
       },
       {
         id: 'minor-triads',
@@ -266,7 +340,7 @@ export const lessonCategories: LessonCategory[] = [
         id: 'diatonic-chord-practice',
         label: 'Diatonic Chord Practice',
         description: 'Measure-length chord changes in one key.',
-        lessons: [cMajorDiatonicChords],
+        lessons: [cMajorDiatonicChords, cMajorPopProgression, simpleMajorKeyPractice],
       },
     ],
   },

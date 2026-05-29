@@ -1,5 +1,5 @@
 import type { MusicalEvent } from '../../lib/musicTypes'
-import { formatEventNotes } from '../../lib/noteUtils'
+import { formatCurrentEventDuration, formatEventNotes } from '../../lib/noteUtils'
 
 interface CurrentEventDisplayProps {
   event: MusicalEvent
@@ -13,6 +13,7 @@ export function CurrentEventDisplay({ event }: CurrentEventDisplayProps) {
       <span>Current</span>
       <strong>{event.label}</strong>
       {noteLabel ? <small>{noteLabel}</small> : <small>Metronome only</small>}
+      <small>{formatCurrentEventDuration(event)}</small>
     </section>
   )
 }

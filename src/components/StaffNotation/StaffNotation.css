@@ -14,6 +14,13 @@
   margin: 0;
 }
 
+.panel-heading p {
+  margin: 4px 0 0;
+  color: #53697c;
+  font-size: 13px;
+  font-weight: 750;
+}
+
 .panel-heading span {
   border: 1px solid #ccd7e2;
   border-radius: 999px;
@@ -33,4 +40,67 @@
 .staff-canvas {
   min-width: 760px;
   min-height: 156px;
+}
+
+.measure-guide {
+  min-width: 760px;
+  padding: 0 16px 14px;
+}
+
+.measure-strip {
+  position: relative;
+  display: flex;
+  min-height: 50px;
+  overflow: hidden;
+  border: 1px solid #d5e0ea;
+  border-radius: 7px;
+  background: #f7fafc;
+}
+
+.measure-separator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 1px;
+  background: rgba(50, 70, 90, 0.32);
+}
+
+.measure-segment {
+  position: relative;
+  z-index: 1;
+  min-width: 42px;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  border-right: 1px solid #e0e8ef;
+  color: #2d4358;
+  padding: 6px 7px;
+}
+
+.measure-segment strong,
+.measure-segment small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.measure-segment strong {
+  font-size: 12px;
+}
+
+.measure-segment small {
+  color: #617689;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.measure-segment.is-active {
+  background: #fff1cf;
+  color: #925a00;
+}
+
+.measure-rest {
+  background: #eef3f7;
+  color: #718294;
 }
