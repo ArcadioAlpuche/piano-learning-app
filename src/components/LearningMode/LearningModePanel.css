@@ -1,0 +1,154 @@
+.learn-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(12, 24, 36, 0.42);
+}
+
+.learn-modal {
+  width: min(980px, 100%);
+  max-height: min(760px, calc(100svh - 40px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  overflow: hidden;
+  border: 1px solid #c9d5e0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(18, 35, 52, 0.24);
+  padding: 18px;
+}
+
+.learn-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.learn-modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.learn-modal-content {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-gutter: stable;
+}
+
+.learn-phase {
+  display: grid;
+  gap: 14px;
+}
+
+.learn-phase-heading,
+.learn-path-heading {
+  display: grid;
+  gap: 5px;
+}
+
+.learn-phase-heading h2,
+.learn-path-heading h3,
+.learn-phase-heading p,
+.learn-path-heading p {
+  margin: 0;
+}
+
+.learn-phase-heading h2 {
+  color: #101c28;
+  font-size: 24px;
+}
+
+.learn-phase-heading p,
+.learn-path-heading p,
+.learn-lesson-grid p {
+  color: #52677a;
+  font-size: 13px;
+}
+
+.learn-path-list,
+.learn-path {
+  display: grid;
+  gap: 12px;
+}
+
+.learn-path-heading strong {
+  color: #183852;
+  font-size: 13px;
+}
+
+.learn-lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.learn-lesson-grid button {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 5px;
+  min-height: 138px;
+  border-color: #d7e2eb;
+  background: #fbfdff;
+  text-align: left;
+  white-space: normal;
+}
+
+.learn-lesson-grid button:hover:not(:disabled) {
+  border-color: #aebfce;
+  background: #f3f8fc;
+}
+
+.learn-lesson-grid button.selected {
+  border-color: #1f5f9f;
+  background: #e8f2fb;
+  box-shadow: inset 3px 0 0 #2368aa;
+}
+
+.learn-lesson-grid span {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #2368aa;
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.learn-lesson-grid strong {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #13293d;
+  font-size: 15px;
+  white-space: normal;
+}
+
+.learn-lesson-grid p {
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.learn-lesson-grid small {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #5f7080;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .learn-lesson-grid {
+    grid-template-columns: 1fr;
+  }
+}

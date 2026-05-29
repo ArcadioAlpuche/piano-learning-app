@@ -49,3 +49,28 @@ export interface LessonGroup {
   description?: string
   lessons: MusicalSequence[]
 }
+
+export type LearningLessonType = 'scale' | 'chord' | 'progression' | 'song' | 'rhythm' | 'concept'
+
+export interface LearningLessonRef {
+  id: string
+  lessonId: string
+  lessonType: LearningLessonType
+  title: string
+  purpose: string
+}
+
+export interface LearningPath {
+  id: string
+  title: string
+  description: string
+  goal: string
+  lessonRefs: LearningLessonRef[]
+}
+
+export interface LearningPhase {
+  id: string
+  title: string
+  description: string
+  paths: LearningPath[]
+}

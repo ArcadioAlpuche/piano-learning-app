@@ -1,4 +1,4 @@
-import type { KeyboardRangeOption, MusicalEvent, NoteName } from './musicTypes'
+import type { KeyboardRangeOption, MusicalEvent, MusicalSequence, NoteName } from './musicTypes'
 
 const NOTE_TO_SEMITONE: Record<string, number> = {
   C: 0,
@@ -79,6 +79,37 @@ export function getKeyboardNotes(range: KeyboardRangeOption): KeyboardNote[] {
 
 export function formatEventNotes(event: MusicalEvent) {
   return event.notes.join(' ')
+}
+
+export function formatBeatCount(durationBeats: number) {
+  const value = Number.isInteger(durationBeats) ? String(durationBeats) : String(durationBeats)
+
+  return `${value} ${durationBeats === 1 ? 'beat' : 'beats'}`
+}
+
+export function formatCurrentEventDuration(event: MusicalEvent) {
+  if (event.durationBeats === 1) {
+    return `Beat 1 of ${event.durationBeats}`
+  }
+
+  return `Hold ${formatBeatCount(event.durationBeats)}`
+}
+
+export function formatSequenceDurationSummary(sequence: MusicalSequence) {
+  const uniqueDurations = Array.from(new Set(sequence.events.map((event) => event.durationBeats)))
+  const eventNoun = sequence.kind === 'chord' ? 'chord' : sequence.kind === 'scale' ? 'note' : 'event'
+
+  if (uniqueDurations.length !== 1) {
+    return 'Mixed durations'
+  }
+
+  const duration = uniqueDurations[0]
+
+  if (sequence.events.length === 1) {
+    return `Hold for ${formatBeatCount(duration)}`
+  }
+
+  return `Each ${eventNoun}: ${formatBeatCount(duration)}`
 }
 
 export function noteToVexKey(note: NoteName) {

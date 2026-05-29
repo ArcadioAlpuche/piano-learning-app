@@ -8,7 +8,7 @@
 
 .top-control-bar {
   display: grid;
-  grid-template-columns: minmax(140px, 0.7fr) minmax(190px, 1fr) 108px minmax(440px, 2.2fr) 112px 130px;
+  grid-template-columns: minmax(140px, 0.7fr) 130px minmax(190px, 1fr) 108px minmax(420px, 2fr) 112px 130px;
   align-items: end;
   gap: 10px;
   padding: 12px 18px;
@@ -37,6 +37,7 @@
 }
 
 .lesson-picker,
+.mode-select,
 .nav-select,
 .tempo-control {
   display: grid;
@@ -80,6 +81,7 @@ button {
   font-weight: 800;
   letter-spacing: 0;
   padding: 6px 10px;
+  white-space: nowrap;
 }
 
 button:hover:not(:disabled) {
@@ -106,7 +108,7 @@ button.primary {
 
 .playback-controls {
   display: grid;
-  grid-template-columns: repeat(4, minmax(72px, max-content)) minmax(120px, 1fr) max-content;
+  grid-template-columns: repeat(4, minmax(64px, max-content)) minmax(120px, 1fr);
   align-items: end;
   gap: 6px;
 }
@@ -126,6 +128,8 @@ input[type='range'] {
 
 .practice-status {
   display: grid;
+  align-content: center;
+  justify-items: start;
   gap: 2px;
   min-height: 55px;
   border: 1px solid var(--border);
@@ -135,11 +139,19 @@ input[type='range'] {
   font-size: 11px;
   font-weight: 800;
   padding: 8px 10px;
+  text-align: left;
+  white-space: normal;
+}
+
+.practice-status:hover {
+  border-color: #aebfce;
+  background: #f3f8fc;
 }
 
 .practice-status strong {
   color: #13293d;
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 1.2;
 }
 
 .learning-stage {
@@ -196,7 +208,7 @@ input[type='range'] {
 
   .playback-controls {
     grid-column: 1 / -1;
-    grid-template-columns: repeat(4, minmax(72px, max-content)) minmax(180px, 1fr) max-content;
+    grid-template-columns: repeat(4, minmax(64px, max-content)) minmax(180px, 1fr);
   }
 }
 
