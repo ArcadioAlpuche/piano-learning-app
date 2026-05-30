@@ -47,15 +47,15 @@
 }
 
 .learn-phase-heading,
-.learn-path-heading {
+.learn-section-toggle div {
   display: grid;
   gap: 5px;
 }
 
 .learn-phase-heading h2,
-.learn-path-heading h3,
+.learn-section-toggle h3,
 .learn-phase-heading p,
-.learn-path-heading p {
+.learn-section-toggle p {
   margin: 0;
 }
 
@@ -65,27 +65,65 @@
 }
 
 .learn-phase-heading p,
-.learn-path-heading p,
+.learn-section-toggle p,
 .learn-lesson-grid p {
   color: #52677a;
   font-size: 13px;
 }
 
-.learn-path-list,
-.learn-path {
+.learn-section-list,
+.learn-section {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
-.learn-path-heading strong {
-  color: #183852;
-  font-size: 13px;
+.learn-section {
+  border: 1px solid #d4e0ea;
+  border-radius: 8px;
+  background: #f8fbfd;
+  padding: 8px;
+}
+
+.learn-section-toggle {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  gap: 8px;
+  border-color: #c9d7e3;
+  background: #eef5fa;
+  text-align: left;
+  white-space: normal;
+}
+
+.learn-section-toggle:hover:not(:disabled) {
+  border-color: #aebfce;
+  background: #e6f0f7;
+}
+
+.learn-section-toggle > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #2368aa;
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.learn-section-toggle h3 {
+  color: #13293d;
+  font-size: 16px;
 }
 
 .learn-lesson-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 8px;
+  padding: 8px 2px 0 36px;
 }
 
 .learn-lesson-grid button {
