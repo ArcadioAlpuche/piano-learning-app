@@ -84,7 +84,7 @@ export function usePlaybackEngine({ sequence }: PlaybackEngineOptions) {
   const [isPlaying, setIsPlayingState] = useState(false)
   const [tempo, setTempoState] = useState(sequence.defaultTempo)
   const [audioMode, setAudioModeState] = useState<AudioMode>('note-click')
-  const [isLoopEnabled, setIsLoopEnabledState] = useState(false)
+  const [isLoopEnabled, setIsLoopEnabledState] = useState(true)
   const [turnaroundMeasures, setTurnaroundMeasuresState] = useState<TurnaroundMeasures>(1)
   const [tempoStepSize, setTempoStepSizeState] = useState<TempoStepSize>(1)
   const [playbackPhase, setPlaybackPhaseState] = useState<PlaybackPhase>('stopped')

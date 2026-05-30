@@ -50,27 +50,28 @@ export interface LessonGroup {
   lessons: MusicalSequence[]
 }
 
-export type LearningLessonType = 'scale' | 'chord' | 'progression' | 'song' | 'rhythm' | 'concept'
+export type LearningLessonType = 'scale' | 'chord' | 'progression' | 'song' | 'exploration'
 
 export interface LearningLessonRef {
   id: string
-  lessonId: string
-  lessonType: LearningLessonType
+  lessonId?: string
+  type: LearningLessonType
   title: string
   purpose: string
+  unlocks?: string[]
+  playable?: boolean
 }
 
-export interface LearningPath {
+export interface LearningSection {
   id: string
   title: string
   description: string
-  goal: string
-  lessonRefs: LearningLessonRef[]
+  lessons: LearningLessonRef[]
 }
 
 export interface LearningPhase {
   id: string
   title: string
   description: string
-  paths: LearningPath[]
+  sections: LearningSection[]
 }

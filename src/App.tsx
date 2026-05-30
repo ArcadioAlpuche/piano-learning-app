@@ -28,7 +28,6 @@ function App() {
   return (
     <main className="app-shell">
       <LearningSession
-        key={selectedSequence.id}
         appMode={appMode}
         keyboardRange={keyboardRange}
         onKeyboardRangeChange={setKeyboardRange}
@@ -151,7 +150,7 @@ function LearningSession({
           <span>Practice</span>
           <strong>
             {playback.audioMode === 'note-click' ? 'Note + click' : playback.audioMode === 'note-only' ? 'Note only' : 'Click only'} -{' '}
-            {playback.isLoopEnabled ? `Loop ${playback.turnaroundMeasures}m` : 'Loop off'}
+            {playback.isLoopEnabled ? 'Loop on' : 'Loop off'}
           </strong>
         </button>
 

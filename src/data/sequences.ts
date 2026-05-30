@@ -195,6 +195,51 @@ const gMajorChord: MusicalSequence = {
   ],
 }
 
+const simpleChordMovement: MusicalSequence = {
+  id: 'simple-chord-movement',
+  title: 'Simple Chord Movement',
+  summary: 'C - G - F - C',
+  kind: 'chord',
+  defaultTempo: 72,
+  clef: 'treble',
+  events: [
+    { id: 'simple-move-c', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+    { id: 'simple-move-g', notes: ['G4', 'B4', 'D5'], durationBeats: 4, label: 'G Major - G B D', metadata: { chordName: 'G Major' } },
+    { id: 'simple-move-f', notes: ['F4', 'A4', 'C5'], durationBeats: 4, label: 'F Major - F A C', metadata: { chordName: 'F Major' } },
+    { id: 'simple-move-c-return', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+  ],
+}
+
+const cMajorCadenceProgression: MusicalSequence = {
+  id: 'c-major-cadence-progression',
+  title: 'I-IV-V in C',
+  summary: 'C - F - G - C',
+  kind: 'chord',
+  defaultTempo: 72,
+  clef: 'treble',
+  events: [
+    { id: 'cadence-c', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+    { id: 'cadence-f', notes: ['F4', 'A4', 'C5'], durationBeats: 4, label: 'F Major - F A C', metadata: { chordName: 'F Major' } },
+    { id: 'cadence-g', notes: ['G4', 'B4', 'D5'], durationBeats: 4, label: 'G Major - G B D', metadata: { chordName: 'G Major' } },
+    { id: 'cadence-c-return', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+  ],
+}
+
+const emotionalMovementProgression: MusicalSequence = {
+  id: 'emotional-movement-c',
+  title: 'Emotional Movement',
+  summary: 'Am - F - C - G',
+  kind: 'chord',
+  defaultTempo: 76,
+  clef: 'treble',
+  events: [
+    { id: 'emotional-am', notes: ['A4', 'C5', 'E5'], durationBeats: 4, label: 'A Minor - A C E', metadata: { chordName: 'A Minor' } },
+    { id: 'emotional-f', notes: ['F4', 'A4', 'C5'], durationBeats: 4, label: 'F Major - F A C', metadata: { chordName: 'F Major' } },
+    { id: 'emotional-c', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+    { id: 'emotional-g', notes: ['G4', 'B4', 'D5'], durationBeats: 4, label: 'G Major - G B D', metadata: { chordName: 'G Major' } },
+  ],
+}
+
 const cMajorPopProgression: MusicalSequence = {
   id: 'c-major-pop-progression',
   title: 'I-V-vi-IV Progression in C',
@@ -207,6 +252,22 @@ const cMajorPopProgression: MusicalSequence = {
     { id: 'pop-v', notes: ['G4', 'B4', 'D5'], durationBeats: 4, label: 'G Major - G B D', metadata: { chordName: 'G Major' } },
     { id: 'pop-vi', notes: ['A4', 'C5', 'E5'], durationBeats: 4, label: 'A Minor - A C E', metadata: { chordName: 'A Minor' } },
     { id: 'pop-iv', notes: ['F4', 'A4', 'C5'], durationBeats: 4, label: 'F Major - F A C', metadata: { chordName: 'F Major' } },
+  ],
+}
+
+const slowBalladProgression: MusicalSequence = {
+  id: 'slow-ballad-style-progression',
+  title: 'Piano Ballad Style Progression',
+  summary: 'Slow C major chord movement',
+  kind: 'chord',
+  defaultTempo: 64,
+  clef: 'treble',
+  events: [
+    { id: 'ballad-c', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+    { id: 'ballad-g', notes: ['G4', 'B4', 'D5'], durationBeats: 4, label: 'G Major - G B D', metadata: { chordName: 'G Major' } },
+    { id: 'ballad-am', notes: ['A4', 'C5', 'E5'], durationBeats: 4, label: 'A Minor - A C E', metadata: { chordName: 'A Minor' } },
+    { id: 'ballad-f', notes: ['F4', 'A4', 'C5'], durationBeats: 4, label: 'F Major - F A C', metadata: { chordName: 'F Major' } },
+    { id: 'ballad-c-return', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
   ],
 }
 
@@ -229,6 +290,54 @@ const simpleMajorKeyPractice: MusicalSequence = {
   ],
 }
 
+const whiteKeyExploration: MusicalSequence = {
+  id: 'white-key-exploration',
+  title: 'White Key Exploration',
+  summary: 'C major backing loop for exploration',
+  kind: 'chord',
+  defaultTempo: 76,
+  clef: 'treble',
+  events: [
+    { id: 'white-c', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+    { id: 'white-g', notes: ['G4', 'B4', 'D5'], durationBeats: 4, label: 'G Major - G B D', metadata: { chordName: 'G Major' } },
+    { id: 'white-am', notes: ['A4', 'C5', 'E5'], durationBeats: 4, label: 'A Minor - A C E', metadata: { chordName: 'A Minor' } },
+    { id: 'white-f', notes: ['F4', 'A4', 'C5'], durationBeats: 4, label: 'F Major - F A C', metadata: { chordName: 'F Major' } },
+  ],
+}
+
+const createYourOwnProgression: MusicalSequence = {
+  id: 'create-your-own-progression',
+  title: 'Create Your Own Progression',
+  summary: 'Try C, G, F, and Am in a new order',
+  kind: 'chord',
+  defaultTempo: 72,
+  clef: 'treble',
+  events: [
+    { id: 'create-c', notes: ['C4', 'E4', 'G4'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+    { id: 'create-am', notes: ['A4', 'C5', 'E5'], durationBeats: 4, label: 'A Minor - A C E', metadata: { chordName: 'A Minor' } },
+    { id: 'create-f', notes: ['F4', 'A4', 'C5'], durationBeats: 4, label: 'F Major - F A C', metadata: { chordName: 'F Major' } },
+    { id: 'create-g', notes: ['G4', 'B4', 'D5'], durationBeats: 4, label: 'G Major - G B D', metadata: { chordName: 'G Major' } },
+  ],
+}
+
+const majorMoodExploration: MusicalSequence = {
+  id: 'major-mood-exploration',
+  title: 'Major Mood Exploration',
+  summary: 'Reorder C major notes and listen for mood',
+  kind: 'scale',
+  defaultTempo: 84,
+  clef: 'treble',
+  events: [
+    { id: 'mood-c', notes: ['C4'], durationBeats: 1, label: 'C4' },
+    { id: 'mood-e', notes: ['E4'], durationBeats: 1, label: 'E4' },
+    { id: 'mood-g', notes: ['G4'], durationBeats: 2, label: 'G4' },
+    { id: 'mood-a', notes: ['A4'], durationBeats: 1, label: 'A4' },
+    { id: 'mood-g-return', notes: ['G4'], durationBeats: 1, label: 'G4' },
+    { id: 'mood-e-return', notes: ['E4'], durationBeats: 1, label: 'E4' },
+    { id: 'mood-c-return', notes: ['C4'], durationBeats: 2, label: 'C4' },
+  ],
+}
+
 const cMajorDiatonicChords: MusicalSequence = {
   id: 'c-major-diatonic-chords',
   title: 'C Major Diatonic Chords',
@@ -245,6 +354,55 @@ const cMajorDiatonicChords: MusicalSequence = {
     { id: 'c-diatonic-vi', notes: ['A4', 'C5', 'E5'], durationBeats: 4, label: 'A Minor - A C E', metadata: { chordName: 'A Minor' } },
     { id: 'c-diatonic-vii', notes: ['B4', 'D5', 'F5'], durationBeats: 4, label: 'B Diminished - B D F', metadata: { chordName: 'B Diminished' } },
     { id: 'c-diatonic-i-high', notes: ['C5', 'E5', 'G5'], durationBeats: 4, label: 'C Major - C E G', metadata: { chordName: 'C Major' } },
+  ],
+}
+
+const happyBirthday: MusicalSequence = {
+  id: 'happy-birthday',
+  title: 'Happy Birthday',
+  summary: 'Familiar melody - simplified in C',
+  kind: 'melody',
+  defaultTempo: 88,
+  clef: 'treble',
+  events: [
+    { id: 'happy-1', notes: ['G4'], durationBeats: 1, label: 'G4' },
+    { id: 'happy-2', notes: ['G4'], durationBeats: 1, label: 'G4' },
+    { id: 'happy-3', notes: ['A4'], durationBeats: 2, label: 'A4' },
+    { id: 'happy-4', notes: ['G4'], durationBeats: 2, label: 'G4' },
+    { id: 'happy-5', notes: ['C5'], durationBeats: 2, label: 'C5' },
+    { id: 'happy-6', notes: ['B4'], durationBeats: 4, label: 'B4' },
+    { id: 'happy-7', notes: ['G4'], durationBeats: 1, label: 'G4' },
+    { id: 'happy-8', notes: ['G4'], durationBeats: 1, label: 'G4' },
+    { id: 'happy-9', notes: ['A4'], durationBeats: 2, label: 'A4' },
+    { id: 'happy-10', notes: ['G4'], durationBeats: 2, label: 'G4' },
+    { id: 'happy-11', notes: ['D5'], durationBeats: 2, label: 'D5' },
+    { id: 'happy-12', notes: ['C5'], durationBeats: 4, label: 'C5' },
+  ],
+}
+
+const odeToJoy: MusicalSequence = {
+  id: 'ode-to-joy',
+  title: 'Ode to Joy',
+  summary: 'Familiar melody - simple stepwise movement',
+  kind: 'melody',
+  defaultTempo: 92,
+  clef: 'treble',
+  events: [
+    { id: 'ode-1', notes: ['E4'], durationBeats: 1, label: 'E4' },
+    { id: 'ode-2', notes: ['E4'], durationBeats: 1, label: 'E4' },
+    { id: 'ode-3', notes: ['F4'], durationBeats: 1, label: 'F4' },
+    { id: 'ode-4', notes: ['G4'], durationBeats: 1, label: 'G4' },
+    { id: 'ode-5', notes: ['G4'], durationBeats: 1, label: 'G4' },
+    { id: 'ode-6', notes: ['F4'], durationBeats: 1, label: 'F4' },
+    { id: 'ode-7', notes: ['E4'], durationBeats: 1, label: 'E4' },
+    { id: 'ode-8', notes: ['D4'], durationBeats: 1, label: 'D4' },
+    { id: 'ode-9', notes: ['C4'], durationBeats: 1, label: 'C4' },
+    { id: 'ode-10', notes: ['C4'], durationBeats: 1, label: 'C4' },
+    { id: 'ode-11', notes: ['D4'], durationBeats: 1, label: 'D4' },
+    { id: 'ode-12', notes: ['E4'], durationBeats: 1, label: 'E4' },
+    { id: 'ode-13', notes: ['E4'], durationBeats: 1, label: 'E4' },
+    { id: 'ode-14', notes: ['D4'], durationBeats: 1, label: 'D4' },
+    { id: 'ode-15', notes: ['D4'], durationBeats: 2, label: 'D4' },
   ],
 }
 
@@ -340,7 +498,18 @@ export const lessonCategories: LessonCategory[] = [
         id: 'diatonic-chord-practice',
         label: 'Diatonic Chord Practice',
         description: 'Measure-length chord changes in one key.',
-        lessons: [cMajorDiatonicChords, cMajorPopProgression, simpleMajorKeyPractice],
+        lessons: [
+          cMajorDiatonicChords,
+          simpleChordMovement,
+          cMajorCadenceProgression,
+          cMajorPopProgression,
+          emotionalMovementProgression,
+          slowBalladProgression,
+          simpleMajorKeyPractice,
+          whiteKeyExploration,
+          createYourOwnProgression,
+          majorMoodExploration,
+        ],
       },
     ],
   },
@@ -351,7 +520,7 @@ export const lessonCategories: LessonCategory[] = [
       {
         id: 'beginner-songs',
         label: 'Beginner Songs',
-        lessons: [maryHadALittleLamb],
+        lessons: [maryHadALittleLamb, happyBirthday, odeToJoy],
       },
     ],
   },

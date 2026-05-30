@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import type { LearningPhase, MusicalSequence } from '../../lib/musicTypes'
 import './LearningModePanel.css'
 
@@ -18,6 +19,9 @@ export function LearningModePanel({
   sequencesById,
   onSelectLesson,
 }: LearningModePanelProps) {
+  const defaultSectionId = useMemo(() => phases[0]?.sections[0]?.id ?? null, [phases])
+  const [expandedSectionId, setExpandedSectionId] = useState<string | null>(defaultSectionId)
+
   if (!isOpen) return null
 
   return (
@@ -32,7 +36,7 @@ export function LearningModePanel({
         <div className="learn-modal-header">
           <div>
             <p className="eyebrow">Learn</p>
-            <h2>Learning Paths</h2>
+            <h2>Phase Library</h2>
           </div>
           <button onClick={onClose} type="button">Close</button>
         </div>
@@ -45,42 +49,61 @@ export function LearningModePanel({
                 <p>{phase.description}</p>
               </div>
 
-              <div className="learn-path-list">
-                {phase.paths.map((path) => (
-                  <section className="learn-path" key={path.id}>
-                    <div className="learn-path-heading">
-                      <h3>{path.title}</h3>
-                      <p>{path.description}</p>
-                      <strong>{path.goal}</strong>
-                    </div>
+              <div className="learn-section-list">
+                {phase.sections.map((section, sectionIndex) => {
+                  const isExpanded =
+                    expandedSectionId === section.id || (!expandedSectionId && sectionIndex === 0)
 
-                    <div className="learn-lesson-grid">
-                      {path.lessonRefs.map((lessonRef) => {
-                        const lesson = sequencesById.get(lessonRef.lessonId)
-                        const isSelected = selectedLessonId === lessonRef.lessonId
+                  return (
+                    <section className="learn-section" key={section.id}>
+                      <button
+                        aria-expanded={isExpanded}
+                        className="learn-section-toggle"
+                        onClick={() => setExpandedSectionId(isExpanded ? null : section.id)}
+                        type="button"
+                      >
+                        <span>{isExpanded ? '-' : '+'}</span>
+                        <div>
+                          <h3>{section.title}</h3>
+                          <p>{section.description}</p>
+                        </div>
+                      </button>
 
-                        return (
-                          <button
-                            className={isSelected ? 'selected' : ''}
-                            disabled={!lesson}
-                            key={lessonRef.id}
-                            onClick={() => {
-                              if (lesson) {
-                                onSelectLesson(lesson)
-                              }
-                            }}
-                            type="button"
-                          >
-                            <span>{lessonRef.lessonType}</span>
-                            <strong>{lessonRef.title}</strong>
-                            <p>{lessonRef.purpose}</p>
-                            <small>{lesson ? 'Playable' : 'Coming later'}</small>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </section>
-                ))}
+                      {isExpanded ? (
+                        <div className="learn-lesson-grid">
+                          {section.lessons.map((lessonRef) => {
+                            const lesson = lessonRef.lessonId ? sequencesById.get(lessonRef.lessonId) : undefined
+                            const isPlayable = lessonRef.playable !== false && Boolean(lesson)
+                            const isSelected = selectedLessonId === lessonRef.lessonId
+
+                            return (
+                              <button
+                                className={isSelected ? 'selected' : ''}
+                                disabled={!isPlayable}
+                                key={lessonRef.id}
+                                onClick={() => {
+                                  if (lesson) {
+                                    onSelectLesson(lesson)
+                                  }
+                                }}
+                                type="button"
+                              >
+                                <span>{lessonRef.type}</span>
+                                <strong>{lessonRef.title}</strong>
+                                <p>{lessonRef.purpose}</p>
+                                {lessonRef.unlocks?.length ? (
+                                  <small>Helps with: {lessonRef.unlocks.join(', ')}</small>
+                                ) : (
+                                  <small>{isPlayable ? 'Playable' : 'Coming later'}</small>
+                                )}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      ) : null}
+                    </section>
+                  )
+                })}
               </div>
             </article>
           ))}
